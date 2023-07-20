@@ -13,21 +13,15 @@ export const App = () => {
   const [loader, setLoader] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [largeImageSrcForModal, setLargeImageSrcForModal] = useState('');
-  const [isMoreButtonShowed, setIsMoreButtonShowed] = useState(false);
+  const [showMoreButton, setShowMoreButton] = useState(false);
+  const [isComponentMounted, setIsComponentMounted] = useState(false);
 
-  const [bool1, setBool1] = useState(false);
-  const [bool2, setBool2] = useState(false);
-
-  const inputSearchText = text => {
-    setSearchText(text);
+  const inputSearchText = searchText => {
+    setSearchText(searchText);
   };
 
-  const setDefImages = images => {
-    setImages(images);
-  };
-
-  const addImages = newIMages => {
-    setImages(prev => [...prev, ...newIMages]);
+  const addImages = images => {
+    setImages(prev => [...prev, ...images]);
   };
 
   const setDefaultPage = () => {
@@ -35,50 +29,52 @@ export const App = () => {
   };
 
   const increasePage = () => {
-    setPage(prev => ++prev);
+    setPage(prev => prev + 1);
   };
 
-  useEffect(() => {
-    if (!bool1) {
-      setBool1(true);
-      return;
-    }
+  const initMoreButton = callback => {
+    if (callback()) setShowMoreButton(true);
+    else setShowMoreButton(false);
+  };
 
+  async function initImagesList(query) {
+    const { hits: images, totalHits } = await fetchImages(query);
+    setImages(images);
+    return totalHits;
+  }
+
+  async function addToImagesList(query) {
+    const { hits: images, totalHits } = await fetchImages(query);
+    addImages(images);
+    return totalHits;
+  }
+
+  async function updateImageList() {
     const query = new URLSearchParams({
       q: searchText,
-      page,
+      page: page,
     }).toString();
+
     setLoader(true);
 
-    console.log(query);
-
-    fetchImages(query).then(({ hits: images, totalHits }) => {
-      if (totalHits > 12) setIsMoreButtonShowed(true);
-      else setIsMoreButtonShowed(false);
-      setDefImages(images);
-      setLoader(false);
-    });
-  }, [searchText]);
-
-  useEffect(() => {
-    if (!bool2) {
-      setBool2(true);
-      return;
+    if (page === 1) {
+      const totalHits = await initImagesList(query);
+      initMoreButton(() => totalHits > 12);
+    } else {
+      const totalHits = await addToImagesList(query);
+      initMoreButton(() => images.length + 12 < totalHits);
     }
 
-    const query = new URLSearchParams({
-      q: searchText,
-      page,
-    });
-    setLoader(true);
+    setLoader(false);
+  }
 
-    fetchImages(query).then(({ hits: images, totalHits }) => {
-      if (images.length + 12 < totalHits) setIsMoreButtonShowed(true);
-      else setIsMoreButtonShowed(false);
-      addImages(images);
-      setLoader(false);
-    });
-  }, [page]);
+  useEffect(() => {
+    if (!isComponentMounted) {
+      setIsComponentMounted(true);
+      return;
+    }
+    updateImageList();
+  }, [page, searchText]);
 
   return (
     <div className="App">
@@ -95,8 +91,10 @@ export const App = () => {
       <Modal
         isModalOpen={isModalOpen}
         largeImageSrcForModal={largeImageSrcForModal}
+        setIsModalOpen={setIsModalOpen}
+        setLargeImageSrcForModal={setLargeImageSrcForModal}
       />
-      {isMoreButtonShowed ? <Button increasePage={increasePage} /> : null}
+      {showMoreButton ? <Button increasePage={increasePage} /> : null}
     </div>
   );
 };

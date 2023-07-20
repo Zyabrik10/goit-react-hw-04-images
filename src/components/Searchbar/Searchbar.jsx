@@ -1,6 +1,6 @@
 import PropsType from 'props-type';
 
-export const Searchbar = ({ inputSearchText, setDefaultPage }) => {
+export const Searchbar = ({ setDefaultPage, inputSearchText }) => {
   const formHandler = e => {
     e.preventDefault();
 

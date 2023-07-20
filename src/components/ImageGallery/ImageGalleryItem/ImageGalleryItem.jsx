@@ -4,8 +4,8 @@ export const ImageGalleryItem = ({
   tags,
   src,
   largeImageURL,
-  setLargeImageSrcForModal,
   setIsModalOpen,
+  setLargeImageSrcForModal,
 }) => {
   const closeModalWindow = () => {
     setLargeImageSrcForModal('');

@@ -1,16 +1,19 @@
+import { Component } from 'react';
 import PropsType from 'props-type';
 
-export const Button = ({ increasePage }) => {
-  const addMoreHandler = () => {
-    increasePage();
+export class Button extends Component {
+  addMoreHandler = () => {
+    this.props.increasePage();
   };
 
-  return (
-    <button className="Button" onClick={addMoreHandler}>
-      Load More
-    </button>
-  );
-};
+  render() {
+    return (
+      <button className="Button" onClick={this.addMoreHandler}>
+        Load More
+      </button>
+    );
+  }
+}
 
 Button.propsType = {
   addImage: PropsType.func,
