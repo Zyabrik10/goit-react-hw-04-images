@@ -14,7 +14,6 @@ export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [largeImageSrcForModal, setLargeImageSrcForModal] = useState('');
   const [showMoreButton, setShowMoreButton] = useState(false);
-  const [isComponentMounted, setIsComponentMounted] = useState(false);
 
   const inputSearchText = searchText => {
     setSearchText(searchText);
@@ -43,38 +42,36 @@ export const App = () => {
     return totalHits;
   }
 
-  async function addToImagesList(query) {
-    const { hits: images, totalHits } = await fetchImages(query);
-    addImages(images);
-    return totalHits;
-  }
-
-  async function updateImageList() {
-    const query = new URLSearchParams({
-      q: searchText,
-      page: page,
-    }).toString();
-
-    setLoader(true);
-
-    if (page === 1) {
-      const totalHits = await initImagesList(query);
-      initMoreButton(() => totalHits > 12);
-    } else {
-      const totalHits = await addToImagesList(query);
-      initMoreButton(() => images.length + 12 < totalHits);
-    }
-
-    setLoader(false);
-  }
-
   useEffect(() => {
-    if (!isComponentMounted) {
-      setIsComponentMounted(true);
-      return;
+    if (searchText === '') return;
+
+    async function addToImagesList(query) {
+      const { hits: images, totalHits } = await fetchImages(query);
+      addImages(images);
+      return totalHits;
     }
+
+    async function updateImageList() {
+      const query = new URLSearchParams({
+        q: searchText,
+        page: page,
+      }).toString();
+
+      setLoader(true);
+
+      if (page === 1) {
+        const totalHits = await initImagesList(query);
+        initMoreButton(() => totalHits > 12);
+      } else {
+        const totalHits = await addToImagesList(query);
+        initMoreButton(() => images.length + 12 < totalHits);
+      }
+
+      setLoader(false);
+    }
+
     updateImageList();
-  }, [page, searchText]);
+  }, [page, searchText, images.length]);
 
   return (
     <div className="App">
