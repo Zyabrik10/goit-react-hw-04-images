@@ -14,6 +14,7 @@ export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [largeImageSrcForModal, setLargeImageSrcForModal] = useState('');
   const [showMoreButton, setShowMoreButton] = useState(false);
+  const [prevPage, setPrevPage] = useState(page);
 
   const inputSearchText = searchText => {
     setSearchText(searchText);
@@ -43,7 +44,7 @@ export const App = () => {
   }
 
   useEffect(() => {
-    if (searchText === '') return;
+    if (searchText === '' || (prevPage !== 1 && page === prevPage)) return;
 
     async function addToImagesList(query) {
       const { hits: images, totalHits } = await fetchImages(query);
@@ -67,11 +68,12 @@ export const App = () => {
         initMoreButton(() => images.length + 12 < totalHits);
       }
 
+      setPrevPage(page);
       setLoader(false);
     }
 
     updateImageList();
-  }, [page, searchText, images.length]);
+  }, [page, searchText, images.length, prevPage]);
 
   return (
     <div className="App">
