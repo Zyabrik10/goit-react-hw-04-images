@@ -71,7 +71,7 @@ export const App = () => {
     }
 
     updateImageList();
-  }, [page, searchText, images.length]);
+  }, [page, searchText]);
 
   return (
     <div className="App">
